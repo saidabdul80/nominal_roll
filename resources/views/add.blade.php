@@ -2,8 +2,9 @@
 
 @section('content')
 <div class="container">
-    <a id="uploaddata" class="btn btn-info text-white mb-3">Upload data</a>
-    <a id="filldata" class="btn btn-info text-white mb-3" style="display: none;">Fill data</a>
+    <a id="uploaddata" class="btn btn-dark text-white mb-3">Upload data</a>
+    <a id="filldata" class="btn btn-info text-white mb-3" >Fill data</a>
+    <a id="area_commandBtn" class="btn btn-warning text-white mb-3" >Update</a>
     
     <div class="row justify-content-center">
         <div class="col-md-12">
@@ -78,6 +79,14 @@
                     </div>
                 </div>
             </div>
+            <div id="area_command" class="col-md-12" style="display: none;">     
+                <div id="fill" class="card">
+                    <div class="card-header"></div>
+                        
+                    <div class="card-body"> 
+                        <v-area-command></v-area-command>
+                    </div>        
+            </div>
         </div>
     </div>
 </div>
@@ -86,17 +95,19 @@
 <script>
     $(document).ready(function(){
         $("#uploaddata").click(function(){
-            $("#fill").hide()
-            $(this).hide()
-            $("#upload").show()                    
-            $("#filldata").show()                    
+            $("#fill").hide()            
+            $("#upload").show()                                      
+            $('#area_command').hide()
         })
         $("#filldata").click(function(){
-            $("#upload").hide();
-            $(this).hide();
-            $("#fill").show();            
-            $("#uploaddata").show();            
-
+            $("#fill").show()            
+            $("#upload").hide()
+            $('#area_command').hide()            
+        })
+        $("#area_commandBtn").click(function(){
+            $("#fill").hide()            
+            $("#upload").hide()
+            $('#area_command').show()            
         })
     });
 </script>

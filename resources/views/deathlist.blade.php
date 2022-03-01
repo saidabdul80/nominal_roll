@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-<v-death></v-death>
+<v-death componentType="death"></v-death>
 @endsection

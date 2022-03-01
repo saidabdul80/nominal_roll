@@ -204,7 +204,7 @@ export default{
 
  props:{
      propsData:{
-         type: Array,
+         type: Object,
          default: null
      },
      edit:{
@@ -272,32 +272,32 @@ export default{
 
      if(this.propsData != null){  
         // console.log(this.propsData)   
-        this.ap_f_no = this.propsData[1]
-        this.rank = this.propsData[2]
-        this.surname = this.propsData[3]
-        this.othername = this.propsData[4]
-        this.gender = this.propsData[5]
-        this.state = this.propsData[6]
-        this.lga = this.propsData[7]
-        this.tribe = this.propsData[8]
-        this.zone = this.propsData[9]
-        this.dob = this.propsData[10]
-        this.doe = this.propsData[11]
-        this.last_promot = this.propsData[12]
-        this.retirement = this.propsData[13]
-        this.date_transfer_to_command = this.propsData[14]
-        this.command_served_last = this.propsData[15]
-        this.qualification = this.propsData[16]
-        this.discipline = this.propsData[17]
-        this.general_duty_specialist = this.propsData[18]
-        this.duty_post_division = this.propsData[19]
-        this.date_transfer_to_division = this.propsData[20]
-        this.date_reported_in_command = this.propsData[21]
-        this.phone = this.propsData[22]
-        this.recruited_as = this.propsData[23]
-        this.address = this.propsData[24]
-        this.nok = this.propsData[25]
-        this.nop = this.propsData[26]
+        this.ap_f_no = this.propsData.ap_f_no
+        this.rank = this.propsData.rank
+        this.surname = this.propsData.surname
+        this.othername = this.propsData.othername
+        this.gender = this.propsData.gender
+        this.state = this.propsData.state_of_origin
+        this.lga = this.propsData.lga
+        this.tribe = this.propsData.tribe
+        this.zone = this.propsData.zone
+        this.dob = this.propsData.dob
+        this.doe = this.propsData.doe
+        this.last_promot = this.propsData.last_promot
+        this.retirement = this.propsData.retirement
+        this.date_transfer_to_command = this.propsData.date_transfer_to_command
+        this.command_served_last = this.propsData.command_served_last
+        this.qualification = this.propsData.qualification
+        this.discipline = this.propsData.discipline
+        this.general_duty_specialist = this.propsData.general_duty_specialist
+        this.duty_post_division = this.propsData.duty_post_division
+        this.date_transfer_to_division = this.propsData.date_transfer_to_division
+        this.date_reported_in_command = this.propsData.date_reported_in_command
+        this.phone = this.propsData.phone
+        this.recruited_as = this.propsData.recruited_as
+        this.address = this.propsData.address
+        this.nok = this.propsData.nok
+        this.nop = this.propsData.nop
     }
     this.$nextTick(function(){              
         $(document).ready(function(){

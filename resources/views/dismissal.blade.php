@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-<center><h1>Dismissal</h1></center>
+<v-dismissal componentType="dismissal"></v-dismissal>
 @endsection

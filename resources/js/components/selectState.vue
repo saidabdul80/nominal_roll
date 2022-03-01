@@ -4,7 +4,7 @@
             <label for="state" class="col-md-4 col-form-label text-md-end">State</label>
             <div class="col-md-8">
                 
-                <select id="state" class="form-control" name="state" @change="checklga"  autofocus>
+                <select id="state" class="form-control" name="state" @change="checklga"   autofocus>
                     <option value="">Select State</option>
                     <option v-for="(state, index) in lgs" :selected="selstate==state.state.toUpperCase()" :key="'x_'+index" :value="state.state.toUpperCase()" >{{state.state.toUpperCase()}}</option>
                 </select>            
@@ -1049,7 +1049,9 @@
                 let rs = this.lgs.filter((item) => {
                     return item.state.toUpperCase() == value;
                 })
-                this.clgas = rs[0].lgas;            
+                if(rs.length> 0){                    
+                    this.clgas = rs[0].lgas;            
+                }
             }
         },
         created(){
@@ -1060,9 +1062,9 @@
                 $(document).ready(function(){
                     $this.checklga();     
                     setTimeout(() => {
-                        $("#lga").val($this.sellga)                           
-                        console.log($this.sellga)
-                    }, 100);     
+                        $("#lga").val($this.sellga) 
+                        document.querySelector('#lga').value = $this.sellga                                                
+                    }, 2000);     
                 })
     	    }); 
         }

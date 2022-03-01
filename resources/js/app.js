@@ -26,6 +26,11 @@ Vue.component('v-select-state', require('./components/selectState.vue').default)
 Vue.component('v-form', require('./components/formRegister.vue').default);
 Vue.component('v-data-list', require('./components/dataList.vue').default);
 Vue.component('v-death', require('./components/death.vue').default);
+Vue.component('v-dismissal', require('./components/dismissal.vue').default);
+Vue.component('vlist', require('./components/listing.vue').default);
+Vue.component('v-phone', require('./components/phonebook.vue').default);
+Vue.component('v-transfer', require('./components/transfer.vue').default); 
+Vue.component('v-area-command', require('./components/area_commad.vue').default);
 window.eventBus = new Vue({});
 
 /**

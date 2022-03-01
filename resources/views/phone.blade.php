@@ -1,5 +1,5 @@
 @extends('layouts.app')
 
 @section('content')
-<center><h1>Phone</h1></center>
+<v-phone componentType="phone"></v-phone>
 @endsection

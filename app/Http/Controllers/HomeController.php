@@ -24,7 +24,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        User::where(["rank_id"=>0, "death_state"=>0,"transfer_state"=>0,"dismissal_state"=>0])->delete();
+        User::where(["rank_id"=>0])->delete();
         return view('home');
     }
     public function addUser()
@@ -34,6 +34,7 @@ class HomeController extends Controller
 
     public function dismissal()
     {        
+        //$dismissals = User::where("dismissal_state",1)->get();
         return view('dismissal');
     }
 

@@ -8,21 +8,31 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
-    
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <link rel="stylesheet" href="{{ asset('js/datatable.css') }}">
     <link rel="stylesheet" href="{{ asset('css/jquery-ui.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/bootstrap4.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/material.css') }}">
+    
     <script src="{{ asset('js/boostrap5js.js') }}"></script>
     <script src="{{ asset('js/datatables.min.js') }}"></script>
     <script src="{{ asset('js/pdfmake.min.js') }}"></script>
     <script src="{{ asset('js/vfs_fonts.js') }}"></script>
     <script src="{{ asset('js/jquery-ui.js') }}"></script>
+    <script src="{{ asset('js/material.js') }}"></script>
+    <script src="{{ asset('js/proper.js') }}"></script>
+    <!-- <script src="{{ asset('js/materialSelect.js') }}"></script> -->
     @yield('script')
     <script>
         window.onload = function(){
             $("#navbarDropdown").click(function(){
                     $(".dropdown-menu").toggleClass("d-block");
             })
+            $("button[data-bs-target='#navbarSupportedContent']").on('click', function(){
+                $("#nav-left").slideToggle();
+            });
         }
+        
     </script>    
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
@@ -152,7 +162,10 @@
                 </div>
             </div>
         </nav>
+
         <div class="m-0 p-0 row">
+            @guest
+            @else
             <div id="nav-left" class="col-md-2 bg-white pt-5 mx-0 px-0">
                 <ul>
                     <li class="{{ Request::is('home')?'Active': ''}}"><a href="/home">Home</a></li>
@@ -163,7 +176,8 @@
                     <li class="{{ Request::is('transfer')?'Active': ''}}"><a href="/transfer">Transfer List</a></li>
                 </ul>
             </div>
-            <main class="py-4 col-md-10">
+            @endguest
+            <main class="py-4 @guest col-md-12 @else col-md-10 @endguest">
                 <?php
                     $routes = array(
 

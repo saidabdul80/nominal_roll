@@ -13,19 +13,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index']);
 
 Route::get('/allrank', [App\Http\Controllers\RankController::class, 'index']);
 Route::get('/alllist', [App\Http\Controllers\RankController::class, 'alllist']);
 Route::get('/alllistx', [App\Http\Controllers\RankController::class, 'alllistx']);
 Route::post('/updateUser', [App\Http\Controllers\RankController::class, 'updateUser']);
 Route::get('/addUser', [App\Http\Controllers\Auth\RegisterController::class, 'register']);
-Route::get('/dismissal', [App\Http\Controllers\RankController::class, 'dismissal']);
-Route::get('/transfer', [App\Http\Controllers\RankController::class, 'transfer']);
+Route::get('/dismissalList', [App\Http\Controllers\RankController::class, 'dismissal']);
+Route::get('/transferList', [App\Http\Controllers\RankController::class, 'transfer']);
 Route::get('/deathList', [App\Http\Controllers\RankController::class, 'deathList']);
 Route::get('/phoneBook', [App\Http\Controllers\RankController::class, 'phoneBook']);
+Route::get('/area_commands', [App\Http\Controllers\RankController::class, 'areaCommands']);
+Route::get('/formed_units', [App\Http\Controllers\RankController::class, 'formedUnits']);
+Route::post('/update_area_command', [App\Http\Controllers\RankController::class, 'UpdateCommand']);
 
 Auth::routes();
 Route::post('/upload',[App\Http\Controllers\RegisterController::class, 'index']);
