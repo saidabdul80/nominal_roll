@@ -1,6 +1,21 @@
 <template>
   <div class="m-0">
-    <div v-show="isloading"      style="position: fixed;height: 100vh;width: 100%;top: 0;left: 0;background: rgba(0, 0, 0, 0.7);">
+    <div v-if="componentType=='datalist'" class="dropdown-menu dropdown-menu-sm shadow" style="position:absolute;z-index:1000;top:0px;left:0px; "  id="context-menu">
+
+      <a @click="contextMenu('transfer')" class="dropdown-item" href="#">Transfer</a>
+      <a @click="contextMenu('dismiss')" class="dropdown-item" href="#">Dismiss</a>
+      <a @click="contextMenu('death')" class="dropdown-item" href="#">Death</a>
+    </div>
+    <div v-if="componentType=='death'" class="dropdown-menu dropdown-menu-sm shadow" style="position:absolute;z-index:1000;top:0px;left:0px;"  id="context-menu">
+      <a @click="contextMenu('undodeath')" class="dropdown-item" href="#">Undo Death Record</a>
+    </div>
+    <div v-if="componentType=='dismissal'" class="dropdown-menu dropdown-menu-sm shadow" style="position:absolute;z-index:1000;top:0px;left:0px; "  id="context-menu">
+      <a @click="contextMenu('undodismissal')" class="dropdown-item" href="#">Undo Dismissal Record</a>      
+    </div>
+    <div v-if="componentType=='transfer'" class="dropdown-menu dropdown-menu-sm shadow" style="position:absolute;z-index:1000;top:0px;left:0px; "  id="context-menu">
+      <a @click="contextMenu('undotransfer')" class="dropdown-item" href="#">Undo Transfer Record</a>      
+    </div>
+    <div v-show="isloading" style="z-index:2000;position: fixed;height: 100vh;width: 100%;top: 0;left: 0;background: rgba(0, 0, 0, 0.7);">
       <div class="m-0">
         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: transparent; display: block;" width="193px" height="103px" viewBox="0 0 100 60" preserveAspectRatio="xMidYMid">
           <defs>
@@ -32,19 +47,19 @@
             </g>
           </g>
         </svg>
-        <h5 class="text-center text-white mt-0">Loading Please Wait...</h5>
+        <h5 class="text-center text-white mt-0">Loading Please Wait... <p style="font-size:2em;font-weight:bolder;text-alight:center;color:white;">{{count}}</p></h5>
+        
       </div>
     </div>
     <!-- <div style="position:relative;">
         <span id="ribbonx3Btn" @click="toggleRibbon" style="top: -25px;position:absolute;right:25px;" class="d-block badge text-white bg-primary" type="button" >toggle</span>
     </div> -->
-    <div class="row m-0">            
-        <!-- <div id="ribbonx3" class="col-md-12 mx-0 row bg-white">                                            
-        </div> -->
-        <div class="col-md-12 mx-0 px-0" ></div>
+    <div class="row m-0">                
+        <div class="col-md-12 mx-0 px-0" >
+          <button class="btn btn-primary" @click="PrintElem('table1212')">print</button>
+        </div>
         <div id="table1212" class="col-md-12 row w-100 p-0 mx-auto mb-3"  style="overflow:hidden; shadow-sm; overflow:scroll;overflow-y:hidden;margin-top: 15px;"    >
-        <table
-            id="dataTablex" class="display table p-0 table-bordered table-hover bg-white" style="margin-top:46px !important; width: 100%; box-shadow: 1px 2px 4px #ccc"
+        <table id="dataTablex" class="display table p-0 table-bordered table-hover bg-white" style="margin-top:46px !important; width: 100%; box-shadow: 1px 2px 4px #ccc"
         >
             <thead class="table-invert">
             <tr>
@@ -141,6 +156,10 @@
 #dataTablex_length{
 
 }
+tr td{
+  cursor: pointer;
+  transition: all 0.2s;
+}
 .dt-buttons.btn-group{
   float: left !important;
 }
@@ -149,22 +168,31 @@
 <script>
 import Swal from "sweetalert2";
 import vform from "./formRegister.vue";
+import vstates from './selectState.vue';
 Vue.component("vform2", require("./formRegister.vue").default);
 export default {    
     props:{
         componentType:{
             type:String,
             default:"datalist"
+        },
+        link:{
+          type:String,
+          default:""
         }   
+
     },
   component: {
     vform: vform,
+    vstates: vstates,
   },
   data() {
     return {
       isloading: true,
+      count:4,
       allLists: [],
       ranks: {},
+      selectUser:"",
       listUsed: [],
       columns : [
               {'data': 'sn'},
@@ -197,7 +225,57 @@ export default {
             ]
     };
   },
-  methods: {      
+  methods: {   
+    countDown(){      
+      let $this =this;
+      setInterval(function(){
+        if($this.count == 0){
+          $this.count = 3;
+        }else{
+          $this.count -=1;
+        }          
+      }, 1000);
+    },   
+    PrintElem(id)
+    {        
+        var mywindow = window.open('', 'new div', 'height=400,width=600');
+        mywindow.document.write('<html>')
+        /*optional stylesheet*/        
+        mywindow.document.write($('head').html());
+        
+        mywindow.document.write(`<body >
+          <h1 class="text-center">List</h1>
+        `);
+        mywindow.document.write($("#"+id).remove('.dataTables_info').html());
+        mywindow.document.write('</body></html>');
+
+        mywindow.print();
+        
+
+        //return true;
+    }, 
+    contextMenu(type,e){
+      if(type == "transfer"){
+        
+        this.alertWithDateRequest('Are you sure you want to transfter <b class=" badge badge-sm bg-success text-white round">'+this.selectUser+'</b>','transfer','/transferout',this.selectUser,1,vstates );       
+      }
+      if(type == "death"){
+        this.alertWithDateRequest('Are you sure you want to Enter Death Record for <b class="badge badge-sm bg-warning py-1 px-2 text-white">'+this.selectUser+'</b>','continue','/death',this.selectUser );       
+      }
+      if(type == "dismiss"){
+        this.alertWithDateRequest('Are you sure you want to dismiss <b class="badge badge-sm bg-danger py-1 px-2 text-white">'+this.selectUser+'</b>','continue','/dismiss',this.selectUser );       
+      }
+      if(type == 'undodeath'){
+        this.undoRequestAlert('Are you sure you want to <span class="text-danger">Undo Death </span> Record for <b class="badge badge-sm bg-warning py-1 px-2 text-white">'+this.selectUser+'</b>','/undodeath',this.selectUser );    
+      }
+      if(type == 'undodismissal'){
+        this.undoRequestAlert('Are you sure you want to  <span class="text-danger">Undo Dismissal </span> Record for <b class="badge badge-sm bg-warning py-1 px-2 text-white">'+this.selectUser+'</b>','/undodismissal',this.selectUser );    
+      }
+      if(type == 'undotransfer'){
+        this.undoRequestAlert('Are you sure you want to  <span class="text-danger">Undo Transfer </span> Record for <b class="badge badge-sm bg-warning py-1 px-2 text-white">'+this.selectUser+'</b>','/undotransfer',this.selectUser );    
+      }
+      $(e).parent().removeClass("show").hide();
+    },
     tableInitializer:function(url,columns){      
       var $this = this;
       
@@ -226,35 +304,66 @@ export default {
                 },
                 /* 'colvis', 'csv' */
             ],
-            //["copy", "csv", "print"],
-
+          "preDrawCallback": function (settings) {
+            $this.isloading = true;
+          },
+          "drawCallback": function( settings ) {
+              $this.isloading = false;
+          },
           initComplete: function (settings, json) {
-            $this.isloading = false;
+            $this.isloading = false;           
+
             $('#dataTablex_paginate').css({
               'position':'fixed', 'bottom':'0px'
             })
-            $("#dataTablex tbody").on("click", "tr", function () {
-                var data = $this.table.row(this).data();
-                //console.log(data);
-                $this.VueSweetAlert2("v-form", { propsData: data, edit: true });
+            $("#dataTablex tbody").on("click", "tr", function (e) {
+                var data = $this.table.row(this).data();                      
+                let w = 262;
+                let h = 52;
+                if(e.ctrlKey){
+                  $this.selectUser = data.ap_f_no;
+                    var top = (e.clientY) -h  +"px";
+                    var mtop = (e.clientY) -h -20 +"px";
+                    var left = (e.clientX) -w + "px";  
+
+                    $("#context-menu").animate(
+                      {
+                      display: "block",                                             
+                      transform: 'scale(0)',     
+                      transition:'all 0.4s',                
+                      top: top,
+                      left: left
+                    },
+                    {
+                    duration: 0,                   
+                    complete: function() {
+                        $( this ).animate({                          
+                          transform: 'scale(1)',
+                          top: mtop,
+                        },{ duration: 500})
+                      }
+                    }).addClass("show").show().on("click", function() {
+                      $("#context-menu").removeClass("show").hide();
+                    })
+                         
+
+                }                          
             });
-           
+
+             $("#dataTablex tbody").on("dblclick", "tr", function () {
+                var data = $this.table.row(this).data();      
+                //console.log(data)          
+                $this.VueSweetAlert2("v-form", { propsData: data, edit: true });
+            });           
       
               $("#dataTablex_length, .dt-buttons.btn-group").css({                  
                   "float": "left",
-                  "position":"absolute",
-                  /* "top":"21%" */
+                  "position":"absolute",                  
               });
-            /*   $(".dt-buttons.btn-group").css({
-                "left":"30%"
-              }); */
               $("#dataTablex_filter").css({
                 "position":"absolute",
                 "right":"0%"
               })
-          /*     $(".dt-buttons.btn-group").css({
-                "top": "18%",                   
-              }) */
 
                  $(".dt-buttons.btn-group").css({
                       "width":"86px",
@@ -262,17 +371,26 @@ export default {
                       "position":" absolute",
                       "left":" 175px",
                       "top":" -7px",
-                  })/* 
-              if($(window).width()<768){                
-
-              }
-                if($(window).width()<634){                  
-            
-                } */
-
-                 
+                  })        
               }, 
           });
+
+          $('.select-filter').on( 'keyup', function (e) {   
+             if (e.key === 'Enter' || e.keyCode === 13) {
+     
+                $this.table.settings()[0].oFeatures.bServerSide = false;
+//                $this.table.settings()[0].ajax = false;
+
+                $this.table.columns( $(this).attr('data-value'))
+                  .search( $(this).val() )
+                  .draw();
+                    $this.table.settings()[0].oFeatures.bServerSide = true;
+                    //$this.table.settings()[0].ajax = true;
+               /*    $this.table.on( 'draw', function () {
+                    console.log( 'Redraw occurred at: '+new Date().getTime() );
+                }); */
+              }               
+          } );
     }
   },
   created() {
@@ -350,17 +468,28 @@ export default {
             }) */
        
     this.$nextTick(function () {
+
+        this.countDown()
+        $('#dataTablex thead tr th').each( function (index) {
+          var title = $(this).text();
+          $(this).html( `<input type="text" value="" data-value="${index}" class="select-filter" placeholder="Search ${title}" />` );
+        });
+        $('body').click(function(e){          
+          if(e.target.id != 'context-menu' && e.target.localName != 'td'){
+            $("#context-menu").removeClass("show").hide();
+          }
+        })     
       var $this = this;
          $('#select-id').on("change",function(e){                           
                     e.preventDefault();         
                       var column;
                       var  arr =$(this).val();
-                      console.log(arr)
+                      //console.log(arr)
                       arr.map((item, index, arrx)=>{
                         arrx[index] = Number(item);
                       })
 
-                      console.log(arr)
+                     // console.log(arr)
                           // Get the column API object
                           for(let i=0; i<=26; i++){
                             //alert($(this).val().indexOf(i))

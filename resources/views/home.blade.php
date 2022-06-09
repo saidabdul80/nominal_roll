@@ -29,7 +29,7 @@
     </select>
     <label class="mdb-main-label text-dark">Remove Column</label>
 </div>
-<v-data-list></v-data-list>
+<v-data-list link="{{ asset('css/bootstrap4.css') }}"></v-data-list>
 @endsection
 @section('script')
 <script>

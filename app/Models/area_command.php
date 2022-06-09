@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class area_command extends Model
 {
     use HasFactory;
+
+   
+    protected $table ="area_commands";
 }

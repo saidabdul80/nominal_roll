@@ -8,4 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class formed_unit extends Model
 {
     use HasFactory;
+
+    
+    protected $table ="formed_units";
 }

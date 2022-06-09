@@ -5359,10 +5359,10 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     checkdiv: function checkdiv(evt) {
-      var value = this.command;
-      console.log(value);
+      var value = this.command; //   console.log(value)
+
       var rs = this.area_commands.filter(function (item) {
-        console.log(item.command.id);
+        // console.log(item.command.id)
         return item.command.id == value;
       });
       this.divisions = rs[0].divisions;
@@ -5379,11 +5379,23 @@ __webpack_require__.r(__webpack_exports__);
     update: function update() {
       axios.post('/update_area_command', {
         ap_f_no: this.ap_f_no,
-        command: this.command,
-        form_unit: this.form_unit,
-        division: this.division
+        command: this.division,
+        form_unit: this.form_unit
       }).then(function (response) {
-        console.log(response);
+        if (response.data == 200) {
+          sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().fire({
+            position: 'top-end',
+            icon: 'success',
+            title: 'Your work has been saved',
+            showConfirmButton: false,
+            timer: 2000
+          });
+        } else {
+          sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().fire({
+            title: 'work not saved, please try again',
+            icon: 'warning'
+          });
+        }
       });
     }
   },
@@ -5902,6 +5914,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js");
 /* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(sweetalert2__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _formRegister_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./formRegister.vue */ "./resources/js/components/formRegister.vue");
+/* harmony import */ var _selectState_vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./selectState.vue */ "./resources/js/components/selectState.vue");
 //
 //
 //
@@ -6050,6 +6063,26 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 Vue.component("vform2", (__webpack_require__(/*! ./formRegister.vue */ "./resources/js/components/formRegister.vue")["default"]));
@@ -6058,16 +6091,23 @@ Vue.component("vform2", (__webpack_require__(/*! ./formRegister.vue */ "./resour
     componentType: {
       type: String,
       "default": "datalist"
+    },
+    link: {
+      type: String,
+      "default": ""
     }
   },
   component: {
-    vform: _formRegister_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
+    vform: _formRegister_vue__WEBPACK_IMPORTED_MODULE_1__["default"],
+    vstates: _selectState_vue__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
   data: function data() {
     return {
       isloading: true,
+      count: 4,
       allLists: [],
       ranks: {},
+      selectUser: "",
       listUsed: [],
       columns: [{
         'data': 'sn'
@@ -6127,6 +6167,54 @@ Vue.component("vform2", (__webpack_require__(/*! ./formRegister.vue */ "./resour
     };
   },
   methods: {
+    countDown: function countDown() {
+      var $this = this;
+      setInterval(function () {
+        if ($this.count == 0) {
+          $this.count = 3;
+        } else {
+          $this.count -= 1;
+        }
+      }, 1000);
+    },
+    PrintElem: function PrintElem(id) {
+      var mywindow = window.open('', 'new div', 'height=400,width=600');
+      mywindow.document.write('<html>');
+      /*optional stylesheet*/
+
+      mywindow.document.write($('head').html());
+      mywindow.document.write("<body >\n          <h1 class=\"text-center\">List</h1>\n        ");
+      mywindow.document.write($("#" + id).remove('.dataTables_info').html());
+      mywindow.document.write('</body></html>');
+      mywindow.print(); //return true;
+    },
+    contextMenu: function contextMenu(type, e) {
+      if (type == "transfer") {
+        this.alertWithDateRequest('Are you sure you want to transfter <b class=" badge badge-sm bg-success text-white round">' + this.selectUser + '</b>', 'transfer', '/transferout', this.selectUser, 1, _selectState_vue__WEBPACK_IMPORTED_MODULE_2__["default"]);
+      }
+
+      if (type == "death") {
+        this.alertWithDateRequest('Are you sure you want to Enter Death Record for <b class="badge badge-sm bg-warning py-1 px-2 text-white">' + this.selectUser + '</b>', 'continue', '/death', this.selectUser);
+      }
+
+      if (type == "dismiss") {
+        this.alertWithDateRequest('Are you sure you want to dismiss <b class="badge badge-sm bg-danger py-1 px-2 text-white">' + this.selectUser + '</b>', 'continue', '/dismiss', this.selectUser);
+      }
+
+      if (type == 'undodeath') {
+        this.undoRequestAlert('Are you sure you want to <span class="text-danger">Undo Death </span> Record for <b class="badge badge-sm bg-warning py-1 px-2 text-white">' + this.selectUser + '</b>', '/undodeath', this.selectUser);
+      }
+
+      if (type == 'undodismissal') {
+        this.undoRequestAlert('Are you sure you want to  <span class="text-danger">Undo Dismissal </span> Record for <b class="badge badge-sm bg-warning py-1 px-2 text-white">' + this.selectUser + '</b>', '/undodismissal', this.selectUser);
+      }
+
+      if (type == 'undotransfer') {
+        this.undoRequestAlert('Are you sure you want to  <span class="text-danger">Undo Transfer </span> Record for <b class="badge badge-sm bg-warning py-1 px-2 text-white">' + this.selectUser + '</b>', '/undotransfer', this.selectUser);
+      }
+
+      $(e).parent().removeClass("show").hide();
+    },
     tableInitializer: function tableInitializer(url, columns) {
       var $this = this;
       this.table = $("#dataTablex").DataTable({
@@ -6153,15 +6241,51 @@ Vue.component("vform2", (__webpack_require__(/*! ./formRegister.vue */ "./resour
         }
         /* 'colvis', 'csv' */
         ],
-        //["copy", "csv", "print"],
+        "preDrawCallback": function preDrawCallback(settings) {
+          $this.isloading = true;
+        },
+        "drawCallback": function drawCallback(settings) {
+          $this.isloading = false;
+        },
         initComplete: function initComplete(settings, json) {
           $this.isloading = false;
           $('#dataTablex_paginate').css({
             'position': 'fixed',
             'bottom': '0px'
           });
-          $("#dataTablex tbody").on("click", "tr", function () {
-            var data = $this.table.row(this).data(); //console.log(data);
+          $("#dataTablex tbody").on("click", "tr", function (e) {
+            var data = $this.table.row(this).data();
+            var w = 262;
+            var h = 52;
+
+            if (e.ctrlKey) {
+              $this.selectUser = data.ap_f_no;
+              var top = e.clientY - h + "px";
+              var mtop = e.clientY - h - 20 + "px";
+              var left = e.clientX - w + "px";
+              $("#context-menu").animate({
+                display: "block",
+                transform: 'scale(0)',
+                transition: 'all 0.4s',
+                top: top,
+                left: left
+              }, {
+                duration: 0,
+                complete: function complete() {
+                  $(this).animate({
+                    transform: 'scale(1)',
+                    top: mtop
+                  }, {
+                    duration: 500
+                  });
+                }
+              }).addClass("show").show().on("click", function () {
+                $("#context-menu").removeClass("show").hide();
+              });
+            }
+          });
+          $("#dataTablex tbody").on("dblclick", "tr", function () {
+            var data = $this.table.row(this).data(); //console.log(data)          
 
             $this.VueSweetAlert2("v-form", {
               propsData: data,
@@ -6171,21 +6295,11 @@ Vue.component("vform2", (__webpack_require__(/*! ./formRegister.vue */ "./resour
           $("#dataTablex_length, .dt-buttons.btn-group").css({
             "float": "left",
             "position": "absolute"
-            /* "top":"21%" */
-
           });
-          /*   $(".dt-buttons.btn-group").css({
-              "left":"30%"
-            }); */
-
           $("#dataTablex_filter").css({
             "position": "absolute",
             "right": "0%"
           });
-          /*     $(".dt-buttons.btn-group").css({
-                "top": "18%",                   
-              }) */
-
           $(".dt-buttons.btn-group").css({
             "width": "86px",
             "float": " left",
@@ -6193,11 +6307,18 @@ Vue.component("vform2", (__webpack_require__(/*! ./formRegister.vue */ "./resour
             "left": " 175px",
             "top": " -7px"
           });
-          /* 
-          if($(window).width()<768){                
-          }
-          if($(window).width()<634){                  
-                    } */
+        }
+      });
+      $('.select-filter').on('keyup', function (e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+          $this.table.settings()[0].oFeatures.bServerSide = false; //                $this.table.settings()[0].ajax = false;
+
+          $this.table.columns($(this).attr('data-value')).search($(this).val()).draw();
+          $this.table.settings()[0].oFeatures.bServerSide = true; //$this.table.settings()[0].ajax = true;
+
+          /*    $this.table.on( 'draw', function () {
+               console.log( 'Redraw occurred at: '+new Date().getTime() );
+           }); */
         }
       });
     }
@@ -6271,16 +6392,26 @@ Vue.component("vform2", (__webpack_require__(/*! ./formRegister.vue */ "./resour
                 confirmButtonText: 'Cool'
             }) */
     this.$nextTick(function () {
+      this.countDown();
+      $('#dataTablex thead tr th').each(function (index) {
+        var title = $(this).text();
+        $(this).html("<input type=\"text\" value=\"\" data-value=\"".concat(index, "\" class=\"select-filter\" placeholder=\"Search ").concat(title, "\" />"));
+      });
+      $('body').click(function (e) {
+        if (e.target.id != 'context-menu' && e.target.localName != 'td') {
+          $("#context-menu").removeClass("show").hide();
+        }
+      });
       var $this = this;
       $('#select-id').on("change", function (e) {
         e.preventDefault();
         var column;
-        var arr = $(this).val();
-        console.log(arr);
+        var arr = $(this).val(); //console.log(arr)
+
         arr.map(function (item, index, arrx) {
           arrx[index] = Number(item);
-        });
-        console.log(arr); // Get the column API object
+        }); // console.log(arr)
+        // Get the column API object
 
         for (var i = 0; i <= 26; i++) {
           //alert($(this).val().indexOf(i))
@@ -6318,6 +6449,43 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -6325,18 +6493,84 @@ __webpack_require__.r(__webpack_exports__);
   component: {
     vlist: _listing_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
+  props: ['link'],
   data: function data() {
-    return {};
+    return {
+      data: []
+    };
   },
-  methods: {},
-  created: function created() {},
+  methods: {
+    PrintElem: function PrintElem(id) {
+      var mywindow = window.open('', 'new div', 'height=400,width=600');
+      mywindow.document.write('<html><head><title>my div</title>');
+      /*optional stylesheet*/
+
+      mywindow.document.write("<link rel=\"stylesheet\" href=\"".concat(this.link, "\" type=\"text/css\" />"));
+      mywindow.document.write("</head><body >\n          <h1 class=\"text-center\">Phone Book</h1>\n        ");
+      mywindow.document.write($("#" + id).html());
+      mywindow.document.write('</body></html>');
+      mywindow.print(); //return true;
+    },
+    pnumber: function pnumber(n) {
+      return Number.parseInt(n) + 1;
+    },
+    tableInitializer: function tableInitializer(url, columns) {
+      var $this = this;
+      this.table = $("#dataTablex").DataTable({
+        //fixedHeader: true,                                  
+        pageLength: 3,
+        "columns": columns,
+        // "lengthMenu": [[2, 3,5, 10, 25, 50, -1], [2, 3, 5, 10, 25, 50, "All"]],            
+        dom: "lBfrtip",
+        buttons: [{
+          extend: 'csv',
+          text: 'Excel',
+          exportOptions: {
+            columns: ':visible'
+          }
+        }
+        /* 'colvis', 'csv' */
+        ],
+        //["copy", "csv", "print"],
+        initComplete: function initComplete(settings, json) {
+          $this.isloading = false;
+          $('#dataTablex_paginate').css({
+            'position': 'fixed',
+            'bottom': '0px'
+          });
+          $("#dataTablex_length, .dt-buttons.btn-group").css({
+            "float": "left",
+            "position": "absolute"
+            /* "top":"21%" */
+
+          });
+          $("#dataTablex_filter").css({
+            "position": "absolute",
+            "right": "0%"
+          });
+          $(".dt-buttons.btn-group").css({
+            "width": "86px",
+            "float": " left",
+            "position": " absolute",
+            "left": " 175px",
+            "top": " -7px"
+          });
+          /* 
+          if($(window).width()<768){                
+          }
+          if($(window).width()<634){                  
+                    } */
+        }
+      });
+    }
+  },
+  created: function created() {
+    var $this = this;
+    axios.get('/phoneBook').then(function (res) {
+      $this.data = res.data;
+    });
+  },
   mounted: function mounted() {
-    /*     Swal.fire({
-                title: 'Error!',
-                text: 'Do you want to continue',
-                icon: 'error',
-                confirmButtonText: 'Cool'
-            }) */
     this.$nextTick(function () {});
   }
 });
@@ -6739,11 +6973,130 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! sweetalert2 */ "./node_modules/sweetalert2/dist/sweetalert2.all.js");
 /* harmony import */ var sweetalert2__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(sweetalert2__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _components_selectState_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./components/selectState.vue */ "./resources/js/components/selectState.vue");
+
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   install: function install(Vue, options) {
     Vue.mixin({
+      data: function data() {
+        return {
+          app_url: 'http://localhost:8000'
+        };
+      },
       methods: {
+        alertWithDateRequest: function alertWithDateRequest(text, name, route, appno) {
+          var _this = this;
+
+          var type = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0;
+          var xhtml = "\n                        <div id='VueSweetAlert4'>\n                        <input type='date' class='form-control' id='alert-datex'>\n                        </div>";
+
+          if (type == 1) {
+            xhtml = "\n                            <div id='VueSweetAlert4'>\n                                <div class=\"row mb-3 mx-auto\">\n                                    <label for=\"state\" class=\"col-md-4 col-form-label text-md-end\">Date</label>\n                                    <div class=\"col-md-8\">  <input type='date' class='form-control' id='alert-datex'></div>\n                                </div>\n                            </div>\n                            ";
+          }
+
+          var width = $(window).width();
+          sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().fire({
+            title: text,
+            html: xhtml,
+            showCancelButton: true,
+            confirmButtonText: name,
+            showLoaderOnConfirm: true,
+            focusConfirm: false,
+            preConfirm: function preConfirm() {
+              var date = document.getElementById('alert-datex').value,
+                  state = '',
+                  lga = '';
+
+              try {
+                if (date == "") {
+                  sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().showValidationMessage("Date Field is Required");
+                  return false;
+                }
+
+                if (type == 1) {
+                  state = $('#VueSweetAlert4 #state').val();
+                  lga = $('#VueSweetAlert4 #state').val();
+
+                  if (state == '' || lga == '') {
+                    sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().showValidationMessage("State and lga transfer to, is Required");
+                    return false;
+                  }
+                }
+
+                return axios.post(_this.app_url + '/api' + route, {
+                  ap_f_no: appno,
+                  date: date,
+                  state: state,
+                  lga: lga
+                }).then(function (response) {
+                  if (response.data.status == 200) {
+                    return response.data.msg;
+                  } else {
+                    sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().showValidationMessage("Request failed: Try Again");
+                  }
+                });
+              } catch (e) {
+                sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().showValidationMessage("Request failed: ".concat(e));
+              }
+            },
+            allowOutsideClick: function allowOutsideClick() {
+              return !sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().isLoading();
+            }
+          }).then(function (result) {
+            if (result.isConfirmed) {
+              sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().fire({
+                title: "".concat(result.value)
+              });
+            }
+          });
+
+          if (type == 1) {
+            var ComponentClass = Vue.extend(Vue.component("vform2", (__webpack_require__(/*! ./components/selectState.vue */ "./resources/js/components/selectState.vue")["default"])));
+            var instance = new ComponentClass().$mount();
+            document.getElementById('VueSweetAlert4').appendChild(instance.$el);
+            $('#VueSweetAlert4 div').removeClass('col-md-6');
+            $('#VueSweetAlert4 .mx-0.px-0').removeClass('col-md-8');
+          }
+        },
+        undoRequestAlert: function undoRequestAlert(text, route, appno) {
+          var _this2 = this;
+
+          sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().fire({
+            title: 'Please Confirm this Action',
+            html: text + '<p><b class="text-danger">Note:</b> this action will roll back this user to the old information state</p>',
+            showCancelButton: true,
+            confirmButtonText: 'Continue',
+            showLoaderOnConfirm: true,
+            focusConfirm: false,
+            preConfirm: function preConfirm() {
+              try {
+                return axios.post(_this2.app_url + '/api' + route, {
+                  ap_f_no: appno
+                }).then(function (response) {
+                  if (response.data.status == 200) {
+                    return response.data.msg;
+                  } else {
+                    sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().showValidationMessage("Request failed: Try Again");
+                  }
+                });
+              } catch (e) {
+                sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().showValidationMessage("Request failed: ".concat(e));
+              }
+            },
+            allowOutsideClick: function allowOutsideClick() {
+              return !sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().isLoading();
+            }
+          }).then(function (result) {
+            if (result.isConfirmed) {
+              sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().fire({
+                title: "".concat(result.value)
+              }).then(function (result) {
+                window.reload();
+              });
+            }
+          });
+        },
         VueSweetAlert2: function VueSweetAlert2(component, propsData) {
           sweetalert2__WEBPACK_IMPORTED_MODULE_0___default().fire({
             html: '<div id="VueSweetAlert2" refs="vForm"></div>',
@@ -11812,7 +12165,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n#tableheader div[data-v-d1294bee] {\r\n  margin: 20px !important;\n}\n.dataTablex_paginate[data-v-d1294bee]{\r\n  position:fixed !important;\r\n  bottom:0px;\n}\n#dataTablex_length[data-v-d1294bee]{\n}\n.dt-buttons.btn-group[data-v-d1294bee]{\r\n  float: left !important;\n}\r\n\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n#tableheader div[data-v-d1294bee] {\r\n  margin: 20px !important;\n}\n.dataTablex_paginate[data-v-d1294bee]{\r\n  position:fixed !important;\r\n  bottom:0px;\n}\n#dataTablex_length[data-v-d1294bee]{\n}\ntr td[data-v-d1294bee]{\r\n  cursor: pointer;\r\n  transition: all 0.2s;\n}\n.dt-buttons.btn-group[data-v-d1294bee]{\r\n  float: left !important;\n}\r\n\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -34888,6 +35241,158 @@ var render = function () {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "m-0" }, [
+    _vm.componentType == "datalist"
+      ? _c(
+          "div",
+          {
+            staticClass: "dropdown-menu dropdown-menu-sm shadow",
+            staticStyle: {
+              position: "absolute",
+              "z-index": "1000",
+              top: "0px",
+              left: "0px",
+            },
+            attrs: { id: "context-menu" },
+          },
+          [
+            _c(
+              "a",
+              {
+                staticClass: "dropdown-item",
+                attrs: { href: "#" },
+                on: {
+                  click: function ($event) {
+                    return _vm.contextMenu("transfer")
+                  },
+                },
+              },
+              [_vm._v("Transfer")]
+            ),
+            _vm._v(" "),
+            _c(
+              "a",
+              {
+                staticClass: "dropdown-item",
+                attrs: { href: "#" },
+                on: {
+                  click: function ($event) {
+                    return _vm.contextMenu("dismiss")
+                  },
+                },
+              },
+              [_vm._v("Dismiss")]
+            ),
+            _vm._v(" "),
+            _c(
+              "a",
+              {
+                staticClass: "dropdown-item",
+                attrs: { href: "#" },
+                on: {
+                  click: function ($event) {
+                    return _vm.contextMenu("death")
+                  },
+                },
+              },
+              [_vm._v("Death")]
+            ),
+          ]
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.componentType == "death"
+      ? _c(
+          "div",
+          {
+            staticClass: "dropdown-menu dropdown-menu-sm shadow",
+            staticStyle: {
+              position: "absolute",
+              "z-index": "1000",
+              top: "0px",
+              left: "0px",
+            },
+            attrs: { id: "context-menu" },
+          },
+          [
+            _c(
+              "a",
+              {
+                staticClass: "dropdown-item",
+                attrs: { href: "#" },
+                on: {
+                  click: function ($event) {
+                    return _vm.contextMenu("undodeath")
+                  },
+                },
+              },
+              [_vm._v("Undo Death Record")]
+            ),
+          ]
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.componentType == "dismissal"
+      ? _c(
+          "div",
+          {
+            staticClass: "dropdown-menu dropdown-menu-sm shadow",
+            staticStyle: {
+              position: "absolute",
+              "z-index": "1000",
+              top: "0px",
+              left: "0px",
+            },
+            attrs: { id: "context-menu" },
+          },
+          [
+            _c(
+              "a",
+              {
+                staticClass: "dropdown-item",
+                attrs: { href: "#" },
+                on: {
+                  click: function ($event) {
+                    return _vm.contextMenu("undodismissal")
+                  },
+                },
+              },
+              [_vm._v("Undo Dismissal Record")]
+            ),
+          ]
+        )
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.componentType == "transfer"
+      ? _c(
+          "div",
+          {
+            staticClass: "dropdown-menu dropdown-menu-sm shadow",
+            staticStyle: {
+              position: "absolute",
+              "z-index": "1000",
+              top: "0px",
+              left: "0px",
+            },
+            attrs: { id: "context-menu" },
+          },
+          [
+            _c(
+              "a",
+              {
+                staticClass: "dropdown-item",
+                attrs: { href: "#" },
+                on: {
+                  click: function ($event) {
+                    return _vm.contextMenu("undotransfer")
+                  },
+                },
+              },
+              [_vm._v("Undo Transfer Record")]
+            ),
+          ]
+        )
+      : _vm._e(),
+    _vm._v(" "),
     _c(
       "div",
       {
@@ -34900,6 +35405,7 @@ var render = function () {
           },
         ],
         staticStyle: {
+          "z-index": "2000",
           position: "fixed",
           height: "100vh",
           width: "100%",
@@ -35061,14 +35567,39 @@ var render = function () {
           ),
           _vm._v(" "),
           _c("h5", { staticClass: "text-center text-white mt-0" }, [
-            _vm._v("Loading Please Wait..."),
+            _vm._v("Loading Please Wait... "),
+            _c(
+              "p",
+              {
+                staticStyle: {
+                  "font-size": "2em",
+                  "font-weight": "bolder",
+                  "text-alight": "center",
+                  color: "white",
+                },
+              },
+              [_vm._v(_vm._s(_vm.count))]
+            ),
           ]),
         ]),
       ]
     ),
     _vm._v(" "),
     _c("div", { staticClass: "row m-0" }, [
-      _c("div", { staticClass: "col-md-12 mx-0 px-0" }),
+      _c("div", { staticClass: "col-md-12 mx-0 px-0" }, [
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-primary",
+            on: {
+              click: function ($event) {
+                return _vm.PrintElem("table1212")
+              },
+            },
+          },
+          [_vm._v("print")]
+        ),
+      ]),
       _vm._v(" "),
       _c(
         "div",
@@ -35236,9 +35767,108 @@ var render = function () {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("vlist", { attrs: { componentType: "phone", length: "10000" } })
+  return _c("div", { staticClass: "row m-0" }, [
+    _c("div", { staticClass: "col-md-12 mx-0 px-0" }),
+    _vm._v(" "),
+    _c(
+      "button",
+      {
+        staticClass: "btn btn-info text-white",
+        staticStyle: { width: "200px" },
+        on: {
+          click: function ($event) {
+            return _vm.PrintElem("table1212")
+          },
+        },
+      },
+      [_vm._v("Print")]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "col-md-12 row w-100 p-0 mx-auto mb-3",
+        staticStyle: {
+          "overflow-y": "scroll",
+          height: "80vh",
+          "overflow-x": "hidden",
+          "margin-top": "15px",
+        },
+        attrs: { id: "table1212" },
+      },
+      _vm._l(_vm.data, function (users, index) {
+        return _c("div", { key: index, staticStyle: { width: "100%" } }, [
+          _c("h5", [_vm._v(_vm._s(users[0].command.head))]),
+          _vm._v(" "),
+          _c(
+            "table",
+            {
+              staticClass:
+                "dataTablex display table p-0 table-bordered table-hover bg-white",
+              attrs: { id: "" },
+            },
+            [
+              _vm._m(0, true),
+              _vm._v(" "),
+              _c(
+                "tbody",
+                _vm._l(users, function (user, index) {
+                  return _c(
+                    "tr",
+                    { key: user.id, staticStyle: { cursor: "pointer" } },
+                    [
+                      _c("td", [_vm._v(_vm._s(_vm.pnumber(index)))]),
+                      _vm._v(" "),
+                      _c("td", [_vm._v(_vm._s(user.ap_f_no))]),
+                      _vm._v(" "),
+                      user.rank == null
+                        ? _c("td", [_vm._v("-")])
+                        : _c("td", [_vm._v(_vm._s(user.rank.abbr))]),
+                      _vm._v(" "),
+                      _c("td", [_vm._v(_vm._s(user.surname))]),
+                      _vm._v(" "),
+                      _c("td", [_vm._v(_vm._s(user.othername))]),
+                      _vm._v(" "),
+                      _c("td", [_vm._v(_vm._s(user.command.name))]),
+                      _vm._v(" "),
+                      _c("td", [_vm._v(_vm._s(user.phone))]),
+                    ]
+                  )
+                }),
+                0
+              ),
+            ]
+          ),
+        ])
+      }),
+      0
+    ),
+  ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("thead", { staticClass: "table-invert" }, [
+      _c("tr", [
+        _c("th", [_vm._v("S/N")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("AP/F NUMBER")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Rank")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Surname")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Othernames")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Division")]),
+        _vm._v(" "),
+        _c("th", [_vm._v("Phone Number")]),
+      ]),
+    ])
+  },
+]
 render._withStripped = true
 
 

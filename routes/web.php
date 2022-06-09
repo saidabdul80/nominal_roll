@@ -37,4 +37,7 @@ Route::get('/death-list', [App\Http\Controllers\HomeController::class, 'deathLis
 Route::get('/dismissal', [App\Http\Controllers\HomeController::class, 'dismissal'])->name('dismissal');
 Route::get('/phone-book', [App\Http\Controllers\HomeController::class, 'phoneBook'])->name('phone-book');
 
+
+
+
 //Route::get('/registerx', [App\Http\Controllers\RegisterController::class, 'index']);

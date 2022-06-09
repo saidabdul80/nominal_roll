@@ -6,8 +6,12 @@ use App\Models\rank;
 use App\Models\User;
 use App\Models\area_command;
 use App\Models\formed_unit;
+use App\Models\UserHistories;
+use ArrayObject;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\DB;
+ 
 class RankController extends Controller
 {
     /**
@@ -15,9 +19,51 @@ class RankController extends Controller
      * @return void
      * 
      */
+    private $searchParams;
     public function __construct()
     {
-      //  $this->middleware('auth');
+      $search ='';
+      $this->searchParams = [
+        'ap_f_no' => $search,
+        'area_commands_id' => $search,
+        'formed_units_id' => $search,
+        'surname' => $search,
+        'othername' => $search,
+        'sex' => $search,
+        'state_of_origin' => $search,
+        'lga' => $search,
+        'tribe' => $search,
+        'zone' => $search,
+        'dob' => $search,
+        'doe' => $search,
+        'last_promot' => $search,
+        'retirement' => $search,
+        'date_transfer_to_command' => $search,
+        'command_served_last' => $search,
+        'qualification' => $search,
+        'discipline' => $search,
+        'general_duty_specialist' => $search,
+        'duty_post_division' => $search,
+        'date_transfer_to_division' => $search,
+        'date_reported_in_command' => $search,
+        'phone' => $search,
+        'recruited_as' => $search,
+        'address' => $search,
+        'nok' => $search,
+        'nop' => $search,
+        'password' => $search,
+        'created_at' => $search,
+        'updated_at' => $search,
+        'status' => $search,
+        'date_transfer_out_of_command' => $search,
+        'state_transfer_to' => $search,
+        'transfer_state' => $search,
+        'death_date' => $search,
+        'death_state' => $search,
+        'dismissal_date' => $search,
+        'dismissal_state' => $search,    
+        'rank'   =>$search
+      ];
     }
 
     /**
@@ -39,6 +85,7 @@ class RankController extends Controller
       ]);      
       return 200;
     }
+    
     public function alllist()
     {
       
@@ -59,68 +106,36 @@ class RankController extends Controller
       $length = $request->get('length');
       $start = $request->get('start');
       $search = $request->get('search')['value'];
-      if($length != -1)
-      {     
-         if(!empty($search)){
-           
-           $allusers = User::with('rank')->whereHas('rank',function($query)use ($search){
-             $query->where('rank.abbr', $search);})->orWhere('ap_f_no', $search)
-             ->orWhere('area_commads_id','like', $search)
-             ->orWhere('formed_units_id','like', $search)     
-             ->orWhere('surname','like', $search)
-             ->orWhere('othername','like', $search)
-             ->orWhere('sex','like', $search)
-             ->orWhere('state_of_origin','like', $search)
-             ->orWhere('lga','like', $search)
-             ->orWhere('tribe','like', $search)
-             ->orWhere('zone','like', $search)
-             ->orWhere('dob','like', $search)
-             ->orWhere('doe','like', $search)
-             ->orWhere('last_promot','like', $search)
-             ->orWhere('retirement','like', $search)
-             ->orWhere('date_transfer_to_command','like', $search)
-             ->orWhere('command_served_last','like', $search)
-             ->orWhere('qualification','like', $search)
-             ->orWhere('discipline','like', $search)
-             ->orWhere('general_duty_specialist','like', $search)
-             ->orWhere('duty_post_division','like', $search)
-             ->orWhere('date_transfer_to_division','like', $search)
-             ->orWhere('date_reported_in_command','like', $search)
-             ->orWhere('phone','like', $search)
-             ->orWhere('recruited_as','like', $search)
-             ->orWhere('address','like', $search)
-             ->orWhere('nok','like', $search)
-             ->orWhere('nop','like', $search)
-             ->orWhere('password','like', $search)
-             ->orWhere('created_at','like', $search)
-             ->orWhere('updated_at','like', $search)
-             ->orWhere('status','like', $search)
-             ->orWhere('date_transfer_out_of_command','like', $search)
-             ->orWhere('state_transfer_to','like', $search)
-             ->orWhere('transfer_state','like', $search)
-             ->orWhere('death_date','like', $search)
-             ->orWhere('death_state','like', $search)
-             ->orWhere('dismissal_date','like', $search)
-             ->orWhere('dismissal_state','like', $search)
-             ->where("dismissal_state",1)
-             ->get();
-          }else{
-           $allusers = User::with('rank')->skip($start)->take($length)->where("dismissal_state",1)->get();  
-         }
-      }else{
-       $allusers = User::with('rank')->where("dismissal_state",1)->get();
+
+      $string = explode('*', $search);        
+      if(sizeof($string)>1 ){
+        $search = $string[0];
       }
+      foreach($this->searchParams as &$param){
+        $param = $search;
+      }
+     
+      if($search != ''){
+        if(sizeof($string)>1 ){         
+          $allusers  = User::searchByRank($this->searchParams,$start,$length,['rank'],["dismissal_state"=>1]);
+        }else{
+          $allusers  = User::searchDataLike($this->searchParams,$start,$length,['rank'],["dismissal_state"=>1]);
+        }
+      }else{
+        $allusers  = User::fetchData($start,$length,['rank'],["dismissal_state"=>1]);
+      }      
  
       $idx = $start;
       foreach($allusers as &$user){
         $idx += 1;
         $user['sn'] = $idx;
       }
+      $count =  User::totalCount($start,$length,['rank'],["dismissal_state"=>1]);
        if(empty($search)){
          $data = [
            "draw"=> $request->get('draw'),
-           "recordsTotal"=>  sizeof( User::all()),
-           "recordsFiltered"=> sizeof( User::all()),
+           "recordsTotal"=>$count,
+           "recordsFiltered"=>  $count,
            "data"=>$allusers
          ];
        }else{
@@ -143,64 +158,163 @@ class RankController extends Controller
       return $transfers;
     }
 
+    public function dismiss(Request $request){
+        $date = $request->get('date');
+        $ap_f_no = $request->get('ap_f_no');
+
+        $user = User::where(['ap_f_no'=>$ap_f_no])->first();
+        $datetime =date('Y-m-d H:i:s',strtotime($date));
+        if(!is_null($user)){
+          $user = $user->toArray();
+          $user['user_id'] = $user['id'];
+          $user['created_at'] = $datetime;
+          $user['updated_at'] = $date;
+          $user['session'] = $date;
+        unset($user['id']);
+
+        try{
+          DB::transaction(function () use($user, $ap_f_no, $date){
+            $insert = UserHistories::insert($user);    
+            $user = User::where('ap_f_no', $ap_f_no)->update(['dismissal_date'=> $date, 'dismissal_state'=>1 ]);      
+          });
+          return json_encode(['msg'=>'Transaction Completed', 'status'=>200]); 
+        }catch(\Exception $e){
+          return json_encode(['msg'=>$e->getMessage(), 'status'=>400]); 
+        }
+      }
+          return json_encode(['msg'=>'Cannot not reach the Database: try again', 'status'=>400]); 
+
+    }
+    public function transferout(Request $request){
+      $date = $request->get('date');
+      $ap_f_no = $request->get('ap_f_no');
+      $state = $request->get('state');
+      $lga = $request->get('lga');
+      $state_lga = $state.' - '.$lga;
+      $user = User::where(['ap_f_no'=>$ap_f_no])->first();
+      $datetime =date('Y-m-d H:i:s',strtotime($date));
+      if(!is_null($user)){
+        $user = $user->toArray();
+        $user['user_id'] = $user['id'];
+        $user['created_at'] = $datetime;
+        $user['updated_at'] = $date;
+        $user['session'] = $date;
+      unset($user['id']);
+
+      try{
+        DB::transaction(function () use($user, $ap_f_no, $date, $state_lga){
+          $insert = UserHistories::insert($user);    
+          $user = User::where('ap_f_no', $ap_f_no)->update(['date_transfer_out_of_command'=> $date, 'transfer_state'=>1, 'state_transfer_to'=>$state_lga ]);      
+        });
+        return json_encode(['msg'=>'Transaction Completed', 'status'=>200]); 
+      }catch(\Exception $e){
+        return json_encode(['msg'=>$e->getMessage(), 'status'=>400]); 
+      }
+      }
+        return json_encode(['msg'=>'Cannot not reach the Database: try again', 'status'=>400]); 
+
+    }
+    public function death(Request $request){
+      $date = $request->get('date');
+        $ap_f_no = $request->get('ap_f_no');
+
+        $user = User::where(['ap_f_no'=>$ap_f_no])->first();
+        $datetime =date('Y-m-d H:i:s',strtotime($date));
+        if(!is_null($user)){
+          $user = $user->toArray();
+          $user['user_id'] = $user['id'];
+          $user['created_at'] = $datetime;
+          $user['updated_at'] = $date;
+          $user['session'] = $date;
+        unset($user['id']);
+
+        try{
+          DB::transaction(function () use($user, $ap_f_no, $date){
+            $insert = UserHistories::insert($user);    
+            $user = User::where('ap_f_no', $ap_f_no)->update(['death_date'=> $date, 'death_state'=>1 ]);      
+          });
+          return json_encode(['msg'=>'Transaction Completed', 'status'=>200]); 
+        }catch(\Exception $e){
+          return json_encode(['msg'=>$e->getMessage(), 'status'=>400]); 
+        }
+      }
+          return json_encode(['msg'=>'Cannot not reach the Database: try again', 'status'=>400]); 
+
+    }
+
+    public function undoDeath(Request $request){
+      $ap_f_no = $request->get('ap_f_no');
+      try{
+          $user = UserHistories::where('ap_f_no', $ap_f_no)->orderBy('id', 'DESC')->first(); 
+          if(!is_null($user)){
+            User::where('ap_f_no',$ap_f_no)->update(['death_state'=>'0', 'death_date'=>'']);            
+            UserHistories::find($user->id)->delete();
+          }else{
+            User::where('ap_f_no',$ap_f_no)->update(['death_state'=>'0', 'death_date'=>'']);                        
+          }
+          return json_encode(['msg'=>'Action Completed', 'status'=>200]); 
+      }catch(\Exception $e){
+        return json_encode(['msg'=>$e->getMessage(), 'status'=>400]); 
+      }
+    }
+
+    public function undoDismissal(Request $request){
+      $ap_f_no = $request->get('ap_f_no');
+      try{
+          $user = UserHistories::where('ap_f_no', $ap_f_no)->orderBy('id', 'DESC')->first(); 
+          if(!is_null($user)){
+            User::where('ap_f_no',$ap_f_no)->update(['dismissal_date'=> '', 'dismissal_state'=>0 ]);            
+            UserHistories::find($user->id)->delete();
+          }else{
+            User::where('ap_f_no',$ap_f_no)->update(['dismissal_date'=> '', 'dismissal_state'=>0 ]);                        
+          }
+          return json_encode(['msg'=>'Action Completed', 'status'=>200]); 
+      }catch(\Exception $e){
+        return json_encode(['msg'=>$e->getMessage(), 'status'=>400]); 
+      }
+    }
+    public function undoTransfer(Request $request){
+      $ap_f_no = $request->get('ap_f_no');
+      try{
+          $user = UserHistories::where('ap_f_no', $ap_f_no)->orderBy('id', 'DESC')->first(); 
+          if(!is_null($user)){
+            User::where('ap_f_no',$ap_f_no)->update(['date_transfer_out_of_command'=> '', 'transfer_state'=>0, 'state_transfer_to'=>'' ]);      
+            UserHistories::find($user->id)->delete();
+          }else{
+            User::where('ap_f_no',$ap_f_no)->update(['date_transfer_out_of_command'=> '', 'transfer_state'=>0, 'state_transfer_to'=>'' ]);      
+          }
+          return json_encode(['msg'=>'Action Completed', 'status'=>200]); 
+      }catch(\Exception $e){
+        return json_encode(['msg'=>$e->getMessage(), 'status'=>400]); 
+      }
+    }
+
     public function deathList(Request $request)
     {        
+      
       $length = $request->get('length');
       $start = $request->get('start');
       $search = $request->get('search')['value'];
-      if($length != -1)
-      {     
-         if(!empty($search)){
-           
-           $allusers = User::with('rank')->whereHas('rank',function($query)use ($search){
-             $query->where('rank.abbr', $search);})->orWhere('ap_f_no', $search)
-             ->orWhere('area_commads_id','like', $search)
-             ->orWhere('formed_units_id','like', $search)     
-             ->orWhere('surname','like', $search)
-             ->orWhere('othername','like', $search)
-             ->orWhere('sex','like', $search)
-             ->orWhere('state_of_origin','like', $search)
-             ->orWhere('lga','like', $search)
-             ->orWhere('tribe','like', $search)
-             ->orWhere('zone','like', $search)
-             ->orWhere('dob','like', $search)
-             ->orWhere('doe','like', $search)
-             ->orWhere('last_promot','like', $search)
-             ->orWhere('retirement','like', $search)
-             ->orWhere('date_transfer_to_command','like', $search)
-             ->orWhere('command_served_last','like', $search)
-             ->orWhere('qualification','like', $search)
-             ->orWhere('discipline','like', $search)
-             ->orWhere('general_duty_specialist','like', $search)
-             ->orWhere('duty_post_division','like', $search)
-             ->orWhere('date_transfer_to_division','like', $search)
-             ->orWhere('date_reported_in_command','like', $search)
-             ->orWhere('phone','like', $search)
-             ->orWhere('recruited_as','like', $search)
-             ->orWhere('address','like', $search)
-             ->orWhere('nok','like', $search)
-             ->orWhere('nop','like', $search)
-             ->orWhere('password','like', $search)
-             ->orWhere('created_at','like', $search)
-             ->orWhere('updated_at','like', $search)
-             ->orWhere('status','like', $search)
-             ->orWhere('date_transfer_out_of_command','like', $search)
-             ->orWhere('state_transfer_to','like', $search)
-             ->orWhere('transfer_state','like', $search)
-             ->orWhere('death_date','like', $search)
-             ->orWhere('death_state','like', $search)
-             ->orWhere('dismissal_date','like', $search)
-             ->orWhere('dismissal_state','like', $search)
-             ->where("death_state",1)
-             ->get();
-          }else{
-           $allusers = User::with('rank')->skip($start)->take($length)->where("death_state",1)->get();  
-         }
-      }else{
-       $allusers = User::with('rank')->where("death_state",1)->get();
+
+      $string = explode('*', $search);        
+      if(sizeof($string)>1 ){
+        $search = $string[0];
       }
- 
-      $idx = $start;
+      foreach($this->searchParams as &$param){
+        $param = $search;
+      }
+     
+      if($search != ''){
+        if(sizeof($string)>1 ){         
+          $allusers  = User::searchByRank($this->searchParams,$start,$length,['rank'],["death_state"=>1]);
+        }else{
+          $allusers  = User::searchDataLike($this->searchParams,$start,$length,['rank'],["death_state"=>1]);
+        }
+      }else{
+        $allusers  = User::fetchData($start,$length,['rank'],["death_state"=>1]);
+      }      
+       $count =  User::totalCount($start,$length,['rank'],["death_state"=>1]);
+      $idx = $start;      
       foreach($allusers as &$user){
         $idx += 1;
         $user['sn'] = $idx;
@@ -208,8 +322,8 @@ class RankController extends Controller
        if(empty($search)){
          $data = [
            "draw"=> $request->get('draw'),
-           "recordsTotal"=>  sizeof( User::all()),
-           "recordsFiltered"=> sizeof( User::all()),
+           "recordsTotal"=> $count,
+           "recordsFiltered"=> $count,
            "data"=>$allusers
          ];
        }else{
@@ -227,8 +341,68 @@ class RankController extends Controller
     }
     public function phoneBook()
     {        
-      $deceases = User::where("death_state",1)->get();
-      return $deceases;
+      $users = User::where('area_commands_id','!=',0)->get();
+      $ranks = rank::all();
+      $commands = area_command::all();
+      $commandshead = json_decode(json_encode($commands));
+ 
+      
+      foreach ($users as &$user) {
+        foreach ($commands as $command) {
+          if($user->area_commands_id === $command->id){
+            
+            $heads =  array_filter($commandshead, function($item)use ($command){ 
+              if($item->by_class == $command->by_class && $item->command == 1){
+                return $item;
+              }
+            });            
+            $nhead = "";
+            foreach ($heads as $head) {              
+              $nhead = $head->name;
+            }
+            $command['head'] = $nhead;
+            $user['command']= $command;
+          }          
+        }
+
+        foreach ($ranks as $rank) {
+          if($user->rank_id == $rank->id){
+            $user['rank'] = $rank;
+          }
+        }
+      }
+
+      
+      $data = array();
+      $track =""; 
+      $index = -1;
+      $users = json_decode(json_encode($users));
+      usort( $users, fn($a, $b) => strcmp($a->command->by_class, $b->command->by_class));
+      //return $users;
+      foreach ($users as $user) {
+        $index++;
+        if($index == 0){
+          $track = $user->command->by_class;
+          $data[$user->command->by_class] = array();
+          array_push($data[$track], $user);
+        }else{
+          if($track != $user->command->by_class){
+            $data[$track] = (Object) $data[$track];
+            $track = $user->command->by_class;
+            $data[$user->command->by_class] = array();
+            array_push($data[$track], $user);
+          }else{
+            array_push($data[$track], $user);
+          }
+        }
+        if(sizeof($users)-1 == $index){
+          $data[$track] = (Object) $data[$track];
+        }
+        
+      }
+      //return $users;
+      return json_encode($data);
+
     }
     public function areaCommands()
     {        
@@ -274,98 +448,47 @@ class RankController extends Controller
     }
     public function alllistx(Request $request)
     {
-     $length = $request->get('length');
-     $start = $request->get('start');
-     $search = $request->get('search')['value'];
-     if($length != -1)
-     {     
-        if(!empty($search)){
-          
-          $allusers = User::with('rank')->whereHas('rank',function($query)use ($search){
-            $query->where('rank.abbr', $search);})->orWhere('ap_f_no', $search)
-            ->orWhere('area_commads_id','like', $search)
-            ->orWhere('formed_units_id','like', $search)     
-            ->orWhere('surname','like', $search)
-            ->orWhere('othername','like', $search)
-            ->orWhere('sex','like', $search)
-            ->orWhere('state_of_origin','like', $search)
-            ->orWhere('lga','like', $search)
-            ->orWhere('tribe','like', $search)
-            ->orWhere('zone','like', $search)
-            ->orWhere('dob','like', $search)
-            ->orWhere('doe','like', $search)
-            ->orWhere('last_promot','like', $search)
-            ->orWhere('retirement','like', $search)
-            ->orWhere('date_transfer_to_command','like', $search)
-            ->orWhere('command_served_last','like', $search)
-            ->orWhere('qualification','like', $search)
-            ->orWhere('discipline','like', $search)
-            ->orWhere('general_duty_specialist','like', $search)
-            ->orWhere('duty_post_division','like', $search)
-            ->orWhere('date_transfer_to_division','like', $search)
-            ->orWhere('date_reported_in_command','like', $search)
-            ->orWhere('phone','like', $search)
-            ->orWhere('recruited_as','like', $search)
-            ->orWhere('address','like', $search)
-            ->orWhere('nok','like', $search)
-            ->orWhere('nop','like', $search)
-            ->orWhere('password','like', $search)
-            ->orWhere('created_at','like', $search)
-            ->orWhere('updated_at','like', $search)
-            ->orWhere('status','like', $search)
-            ->orWhere('date_transfer_out_of_command','like', $search)
-            ->orWhere('state_transfer_to','like', $search)
-            ->orWhere('transfer_state','like', $search)
-            ->orWhere('death_date','like', $search)
-            ->orWhere('death_state','like', $search)
-            ->orWhere('dismissal_date','like', $search)
-            ->orWhere('dismissal_state','like', $search)
-            ->get();
-        
-        
-        
 
+        $length = $request->get('length');
+        $start = $request->get('start');
+        $search = $request->get('search')['value'];
 
-        }else{
-          $allusers = User::with('rank')->skip($start)->take($length)->get();  
+        $string = explode('*', $search);        
+        if(sizeof($string)>1 ){
+          $search = $string[0];
         }
-     }else{
-      $allusers = User::with('rank')->get();
-     }
-
+        foreach($this->searchParams as &$param){
+          $param = $search;
+        }
+       
+        if($search != ''){
+          if(sizeof($string)>1 ){         
+            $allusers  = User::searchByRank($this->searchParams,$start,$length,['rank']);
+          }else{
+            $allusers  = User::searchDataLike($this->searchParams,$start,$length,['rank']);
+          }
+        }else{
+          $allusers  = User::fetchData($start,$length,['rank']);
+        }
      $idx = $start;
      foreach($allusers as &$user){
        $idx += 1;
        $user['sn'] = $idx;
      }
-     /*  
-     $cm = array_map(function($e) use($idx){
-      $x = $idx++;
-      array_push($e,['sn'=>$x]);
-      $e['rank_id'] = $e['rank']['abbr'];
-       $f = array_values($e);              
-       
-       $filtered = array_filter($f,function ($key){
-            return $key < 26 && $key != 0;
-        },ARRAY_FILTER_USE_KEY);  
-
-       return json_decode(json_encode(array_values($filtered)),true);
-      }, json_decode(json_encode($allusers), true));
-      */
-      //return DataTables::of(User::with('rank')->get())->make(true);
+     $count =  User::totalCount($start,$length,['rank']);
       if(empty($search)){
         $data = [
           "draw"=> $request->get('draw'),
-          "recordsTotal"=>  sizeof( User::all()),
-          "recordsFiltered"=> sizeof( User::all()),
+          "recordsTotal"=> $count,
+          "recordsFiltered"=> $count,
           "data"=>$allusers
         ];
       }else{
         $data = [
           "draw"=> $request->get('draw'),
-          "length"=>sizeof($allusers),
-          "recordsTotal"=>  sizeof($allusers),
-          "recordsFiltered"=> sizeof($allusers),
+          "length"=>$count,
+          "recordsTotal"=>  $count,
+          "recordsFiltered"=> $count,
           "data"=>$allusers
         ];
       }

@@ -62,9 +62,9 @@ export default {
   methods: {    
       checkdiv:function(evt){      
                 let value = this.command;
-                console.log(value)
+             //   console.log(value)
                 let rs = this.area_commands.filter((item) => {
-                    console.log(item.command.id)
+                   // console.log(item.command.id)
                     return item.command.id == value;
                 })
                 this.divisions = rs[0].divisions;            
@@ -81,10 +81,23 @@ export default {
                 }, {}); // empty object is the initial value for result object
             },
             update:function(){
-                axios.post('/update_area_command', {ap_f_no:this.ap_f_no,command:this.command, form_unit:this.form_unit, division:this.division})
+                axios.post('/update_area_command', {ap_f_no:this.ap_f_no,command:this.division, form_unit:this.form_unit})
                 .then((response) => 
                 {
-                    console.log(response);
+                    if(response.data == 200){
+                        Swal.fire({
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Your work has been saved',
+                        showConfirmButton: false,
+                        timer: 2000
+                        });                            
+                    }else{
+                        Swal.fire({
+                            title: 'work not saved, please try again',
+                            icon: 'warning'
+                        })
+                    }
                 })
             }
     

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\Searchable;
+use App\Traits\Utils;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,7 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Searchable, Utils;
 
     /**
      * The attributes that are mass assignable.
@@ -52,8 +54,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 
     ];
 
     /**
@@ -68,5 +69,17 @@ class User extends Authenticatable
     {
         return $this->belongsTo(rank::class);
     }
+
+    public function formed_unit()
+    {
+        return $this->belongsTo(formed_unit::class);
+    }
+
+    public function area_command()
+    {
+        return $this->belongsTo(area_command::class);
+    }
     protected $table ="users";
+
+
 }
